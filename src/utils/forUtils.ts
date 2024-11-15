@@ -1,3 +1,5 @@
+import { ForContent } from "../models/forContent"
+import { TemplateVariableObject } from "../models/templateVariableObject"
 import { endCommand, forCommand, forInCommand } from "./templateComands"
 
 export function getAppearForLine(lines:string[]): string | null {
@@ -32,3 +34,19 @@ export function getForVariable(line:string){
     const forLine = line.substring(startIndex, endIndex)
     return forLine.replace(forCommand, '').replace(' ', '')
 }
+
+export function copyForContent(obj: ForContent): ForContent {
+    // Creamos una copia del objeto actual
+    const copy: ForContent = {
+        elementName: obj.elementName,
+        value: new TemplateVariableObject(obj.value), // Copiamos el objeto value
+    };
+
+    // Si hay un objeto child, lo copiamos recursivamente
+    if (obj.child) {
+        copy.child = copyForContent(obj.child);
+    }
+
+    return copy;
+}
+ 

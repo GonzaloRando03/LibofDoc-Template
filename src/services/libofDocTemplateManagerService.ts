@@ -51,6 +51,7 @@ import { VariableService } from "./variableService"
         if (variableName.includes('.') && forContent){
             const content = ForService.getForContent(variableName.split('.')[0], forContent)
             if (!content) throw Error('LibofDocTemplateError: Variable ' + variableName + ' not found.')   
+
             return content!.value.get(variableName.split('.')[1])!
         }
 

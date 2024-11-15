@@ -1,6 +1,6 @@
 import { ForContent } from "../models/forContent";
 import { TemplateVariableObject } from "../models/templateVariableObject";
-import { getAppearForLine, getForName, getForVariable, removeForCommand } from "../utils/forUtils";
+import { copyForContent, getAppearForLine, getForName, getForVariable, removeForCommand } from "../utils/forUtils";
 import { endForCommand } from "../utils/templateComands";
 import { LibofDocTemplateManagerService } from "./libofDocTemplateManagerService";
 import { VariableService } from "./variableService";
@@ -8,7 +8,6 @@ import { VariableService } from "./variableService";
 class ForServiceImp {
 
      applyNextFor(lines:string[], forContent:ForContent): string[] {
-        console.log('vamos a aplicar el for para: ', forContent )
         const nextForCommand = getAppearForLine(lines)
     
         if (nextForCommand === null) return lines
@@ -19,10 +18,12 @@ class ForServiceImp {
     
         let nextForApplyLines:string[] = []
         const nextForVariableContent = LibofDocTemplateManagerService.getVariableValue(nextForName, forContent) as TemplateVariableObject[]
+        
         //Iteramos los elementos del for
         nextForVariableContent.forEach(content => {
             //Creamos el forContent de cada elemento
-            const forElementForContent = this.addForContentLastChild({...forContent}, {
+            const forContentForChild = copyForContent(forContent)
+            const forElementForContent = this.addForContentLastChild(forContentForChild, {
                 elementName: nextForVariableName,
                 value: content
             })
@@ -98,7 +99,6 @@ class ForServiceImp {
     
         return {forLines, startIndex, endIndex}
     }
-     
 
      addNewForContentChild(child:ForContent, parents:ForContent[]): ForContent {
         //Nota: hacer una funcion que cambie de forContent a array de parents y viceversa.

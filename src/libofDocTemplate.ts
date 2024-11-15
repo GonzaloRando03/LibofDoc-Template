@@ -20,10 +20,11 @@ class LibofDocTemplateImp {
     async applyTemplateFromBuffer(docBuffer: ArrayBuffer)  {
         const files:DocFile[] = await this.getFilesFromBuffer(docBuffer)
         const fileContent = this.getDocFileContent(files)
-        console.log('el filecontent es: ', fileContent)
         const fileContentAppy = LibofDocTemplateManagerService.applyTemplate(fileContent)
         const newFiles = this.updateFileContent(files, fileContentAppy)
         const fileBlob = await this.getDocumentBlobFromFiles(newFiles)
+        //Limpiamos para no dejar variables residuales a la hora de hacer el próximo documento
+        LibofDocTemplateManagerService.removeVariables()
         return fileBlob
     }
 
