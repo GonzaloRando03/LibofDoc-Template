@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "esnext",  // Puede ser "esnext" en lugar de "es6" para asegurar que se usen características modernas
+    "target": "es2019",  // O cualquier target de tu preferencia
+    "moduleResolution": "node",  // Asegura que se resuelvan correctamente los módulos de Node
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "removeComments": true ,
+    "outDir": "dist-browser",
+    "rootDir": "src",
+    "lib": ["es2019", "dom"], 
+                  // Opcional, puede ayudar a evitar errores de tipo en bibliotecas
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es6",  
+    "module": "commonjs",
+    "outDir": "dist-node",
+    "rootDir": "src",
+    "strict": true,
+    "lib": ["es2019", "dom"], 
+    "esModuleInterop": true  
+  },
+  "include": ["src/**/*.ts"]
+}
+
+  

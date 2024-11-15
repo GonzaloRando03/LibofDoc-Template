@@ -1,0 +1,35 @@
+{
+  "name": "libof-doc-tempale",
+  "version": "1.0.0",
+  "description": "Library for generating odt documents for JavaScript",
+  "main": "dist-node/index.js",
+  "module": "dist-browser/index.js",
+  "types": "src/index.ts",
+  "homepage": "https://github.com/GonzaloRando03/Libof-Doc-Template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GonzaloRando03/Libof-Doc-Template"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-browser": "tsc -p tsconfig.dist-browser.json",
+    "build-node": "tsc -p tsconfig.dist-node.json",
+    "build": "npm run build-browser & npm run build-node"
+  },
+  "keywords": [
+    "document",
+    "doc",
+    "docx",
+    "generate",
+    "msword"
+  ],
+  "author": "Gonzalo Rando Serna",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}

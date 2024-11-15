@@ -1,0 +1,1 @@
+export class TemplateVariableObject extends Map<string, string | TemplateVariableObject[]>{}
