@@ -1,15 +1,27 @@
 import JSZip from "jszip"
 import { DocFile } from "./models/docFile";
 import { TemplateVariableObject } from "./models/templateVariableObject";
-import { LibofDocTemplateManagerService } from "./services/libofDocTemplateManagerService";
+import { LibofDocTemplateManagerService } from "./services/templateManagerService";
 
-class LibofDocTemplateImp {
+export class LibofDocTemplateImp {
+
+    private variables: TemplateVariableObject = new Map()
 
     private contentFile = 'content.xml';
     private manifestFile = 'META-INF/manifest.xml'
 
-    async applyTemplate(file:string){
-        return await LibofDocTemplateManagerService.applyTemplate(file)
+    addVariable(name:string, value: string | TemplateVariableObject[] | Blob){
+        this.variables.set(name, value)
+    }
+
+    async applyTemplateFromUrlDocAndDownload(docPath:string){
+        const blob = await this.applyTemplateFromAssetsDoc(docPath)
+        await this.downloadBlob(blob)
+    }
+
+    async applyTemplateFromBufferAndDownload(docBuffer: ArrayBuffer) {
+        const blob = await this.applyTemplateFromBuffer(docBuffer)
+        await this.downloadBlob(blob)
     }
 
     async applyTemplateFromAssetsDoc(docPath: string){
@@ -21,19 +33,30 @@ class LibofDocTemplateImp {
     async applyTemplateFromBuffer(docBuffer: ArrayBuffer)  {
         const files:DocFile[] = await this.getFilesFromBuffer(docBuffer)
         const fileContent = this.getDocFileContent(files)
-        const fileContentApply = await LibofDocTemplateManagerService.applyTemplate(fileContent)
+        const fileContentApply = await LibofDocTemplateManagerService.applyTemplate(fileContent, this.variables)
         const fileContentApplyWithStyles = this.applyStylesToContent(fileContentApply)
         const manifest = this.getDocManifest(files)
         const applyManifest = this.applyImagesToManifest(manifest)
         const newFiles = this.updateDocumentFiles(files, fileContentApplyWithStyles, applyManifest)
         const fileBlob = await this.getDocumentBlobFromFiles(newFiles)
-        //Limpiamos para no dejar variables residuales a la hora de hacer el próximo documento
-        LibofDocTemplateManagerService.removeVariables()
+        //Limpiamos las imágenes del servicio
+        LibofDocTemplateManagerService.clearImages()
         return fileBlob
     }
 
-    addVariable(name:string, value: string | TemplateVariableObject[] | Blob){
-        LibofDocTemplateManagerService.addVariable(name, value)
+    private async downloadBlob(blob:Blob){
+        const url = URL.createObjectURL(blob);
+
+        // Crear un enlace de descarga
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'archivo.odt'; // Nombre del archivo a descargar
+
+        // Simular un clic en el enlace para iniciar la descarga
+        a.click();
+
+        // Limpiar la URL del objeto después de la descarga
+        URL.revokeObjectURL(url);
     }
 
     private async getFilesFromBuffer(docBuffer: ArrayBuffer){
@@ -78,7 +101,7 @@ class LibofDocTemplateImp {
 
         const imagesBase64Promise = LibofDocTemplateManagerService.getImages().map(async image => {
             const base64 = await image.getImageBase64()
-            zip.file(image.zipUri, base64, { base64: true });
+            zip.file(image.zipUri, base64.split(",")[1], { base64: true });
         }) 
         await Promise.all(imagesBase64Promise)
 
@@ -115,5 +138,3 @@ class LibofDocTemplateImp {
     }
 
 }
-
-export const LibofDocTemplate = new LibofDocTemplateImp()

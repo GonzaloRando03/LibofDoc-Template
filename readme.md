@@ -1,12 +1,38 @@
 # Libof Doc
 
-Library for generating odt and doc documents for JavaScript and TypeScript
+Library to generate LibreOffice documents from a template document for JavaScript and TypeScript
 
 ## Installation
+
 You can install the library via npm:
 ```
-npm install libof-doc
+npm install libof-doc-template
 ```
+
+## Create a new Template Document
+
+To create a template document you need to program in your LibreOffice document.
+
+To use the LibofDocTemplate syntax we will use the following pattern: [!ldt action]
+
+### Declare variables
+```
+[!ldt var=variableName]
+```
+
+### Iterate Arrays
+
+We can iterate arrays with LibofDocTemplate! To do this we use a for loop and access the values ​​of each element using a "."
+```
+[!ldt for=element in array]
+
+[!ldt var=element.name] : [!ldt var=element.value]
+
+[!ldt end=array]
+```
+
+### Template Example
+
 
 ## Usage
 

@@ -9,30 +9,18 @@ import { DocImage } from '../models/docImage'
 
 
  class LibofDocTemplateManagerServiceImp {
-
-    private variables: TemplateVariableObject = new Map()
     private images: DocImage[] = []
 
-
-    addVariable(name:string, value: string | TemplateVariableObject[] | Blob){
-        this.variables.set(name, value)
-    }
-
-    removeVariables(){
-        this.variables = new Map()
-        this.images = []
-    }
-
-    private async applyAllFor(lines:string[]): Promise<string[]> {
+    private async applyAllFor(lines:string[], variables: TemplateVariableObject): Promise<string[]> {
         const baseForContent: ForContent = {
             elementName: 'parent',
-            value: this.variables
+            value: variables
         }
     
-        const forApplyedLines = await ForService.applyNextFor(lines, baseForContent)
+        const forApplyedLines = await ForService.applyNextFor(variables, lines, baseForContent)
         const nextForCommand = getAppearForLine(forApplyedLines)
         return nextForCommand
-            ? await this.applyAllFor(forApplyedLines)
+            ? await this.applyAllFor(forApplyedLines, variables)
             : forApplyedLines
     }
 
@@ -44,21 +32,20 @@ import { DocImage } from '../models/docImage'
         return cleanLdtTags(lines)
     }
 
-    async applyTemplate(contentXml:string){
+    async applyTemplate(contentXml:string, variables: TemplateVariableObject){
         let lines = this.formatXml(contentXml)
-        lines = await this.applyAllFor(lines)
-        const tamplateLines = await VariableService.applyVariablesInLines(lines)
+        lines = await this.applyAllFor(lines, variables)
+        const tamplateLines = await VariableService.applyVariablesInLines(variables, lines)
         return tamplateLines.join(' ')
     }
 
-    async getVariableValue(variableName:string, forContent?:ForContent):  Promise<string | TemplateVariableObject[]> {
+    async getVariableValue(variables: TemplateVariableObject, variableName:string, forContent?:ForContent):  Promise<string | TemplateVariableObject[]> {
         if (variableName.includes('.') && forContent){
             const content = ForService.getForContent(variableName.split('.')[0], forContent)
-            if (!content) throw Error('LibofDocTemplateError: Variable ' + variableName + ' not found.')   
+            if (!content) throw Error('LibofDocTemplateError: Variable ' + variableName + ' not found.')  
             return await this.formatVariableToReturn(content!.value.get(variableName.split('.')[1])!)
         }
-
-        return await this.formatVariableToReturn(this.variables.get(variableName)!)
+        return await this.formatVariableToReturn(variables.get(variableName)!)
     }
 
     private async formatVariableToReturn(variableValue: string | TemplateVariableObject[] | Blob){
@@ -73,6 +60,10 @@ import { DocImage } from '../models/docImage'
 
     getImages() {
         return this.images
+    }
+
+    clearImages(){
+        this.images = []
     }
 }
 
