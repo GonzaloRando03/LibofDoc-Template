@@ -1,1 +1,1 @@
-export class TemplateVariableObject extends Map<string, string | TemplateVariableObject[]>{}
+export class TemplateVariableObject extends Map<string, string | TemplateVariableObject[] | Blob>{}

@@ -7,7 +7,7 @@ import { VariableService } from "./variableService";
 
 class ForServiceImp {
 
-     applyNextFor(lines:string[], forContent:ForContent): string[] {
+     async applyNextFor(lines:string[], forContent:ForContent): Promise<string[]> {
         const nextForCommand = getAppearForLine(lines)
     
         if (nextForCommand === null) return lines
@@ -17,10 +17,10 @@ class ForServiceImp {
         const nextForName = getForName(nextForCommand)
     
         let nextForApplyLines:string[] = []
-        const nextForVariableContent = LibofDocTemplateManagerService.getVariableValue(nextForName, forContent) as TemplateVariableObject[]
+        const nextForVariableContent = await LibofDocTemplateManagerService.getVariableValue(nextForName, forContent) as TemplateVariableObject[]
         
         //Iteramos los elementos del for
-        nextForVariableContent.forEach(content => {
+        for (let content of nextForVariableContent){
             //Creamos el forContent de cada elemento
             const forContentForChild = copyForContent(forContent)
             const forElementForContent = this.addForContentLastChild(forContentForChild, {
@@ -32,13 +32,13 @@ class ForServiceImp {
             const forLinesWithoutCommand = removeForCommand(nextForName, [...nextForLines.forLines]) 
 
     
-            const applyedChildForLines = this.applyChildFors(forLinesWithoutCommand, forElementForContent)
+            const applyedChildForLines = await this.applyChildFors(forLinesWithoutCommand, forElementForContent)
 
-            const applyedVariablesForLines = VariableService.applyVariablesInLines(applyedChildForLines, forElementForContent)
+            const applyedVariablesForLines = await VariableService.applyVariablesInLines(applyedChildForLines, forElementForContent)
 
             nextForApplyLines = nextForApplyLines.concat(applyedVariablesForLines)
 
-        })
+        }
         //Sustituimos el for sin aplicar por el for aplicado
         const forApplyedLinesWithoutCommands = removeForCommand(nextForName, nextForApplyLines)
         const fullApplyLines = [...lines]
@@ -47,15 +47,15 @@ class ForServiceImp {
     }
     
     
-     applyChildFors(lines:string[], forContent:ForContent): string[] {
+     async applyChildFors(lines:string[], forContent:ForContent): Promise<string[]> {
         const parentLines = [...lines]
 
-        const applyedForLines = this.applyNextFor(parentLines, forContent)
+        const applyedForLines = await this.applyNextFor(parentLines, forContent)
   
         const nextForCommand = getAppearForLine(applyedForLines)
 
         if (nextForCommand !== null){
-            return this.applyChildFors(applyedForLines, forContent)
+            return await this.applyChildFors(applyedForLines, forContent)
         }
 
         return applyedForLines

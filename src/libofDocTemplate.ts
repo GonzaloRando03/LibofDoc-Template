@@ -6,9 +6,10 @@ import { LibofDocTemplateManagerService } from "./services/libofDocTemplateManag
 class LibofDocTemplateImp {
 
     private contentFile = 'content.xml';
+    private manifestFile = 'META-INF/manifest.xml'
 
-    applyTemplate(file:string){
-        return LibofDocTemplateManagerService.applyTemplate(file)
+    async applyTemplate(file:string){
+        return await LibofDocTemplateManagerService.applyTemplate(file)
     }
 
     async applyTemplateFromAssetsDoc(docPath: string){
@@ -20,15 +21,18 @@ class LibofDocTemplateImp {
     async applyTemplateFromBuffer(docBuffer: ArrayBuffer)  {
         const files:DocFile[] = await this.getFilesFromBuffer(docBuffer)
         const fileContent = this.getDocFileContent(files)
-        const fileContentAppy = LibofDocTemplateManagerService.applyTemplate(fileContent)
-        const newFiles = this.updateFileContent(files, fileContentAppy)
+        const fileContentApply = await LibofDocTemplateManagerService.applyTemplate(fileContent)
+        const fileContentApplyWithStyles = this.applyStylesToContent(fileContentApply)
+        const manifest = this.getDocManifest(files)
+        const applyManifest = this.applyImagesToManifest(manifest)
+        const newFiles = this.updateDocumentFiles(files, fileContentApplyWithStyles, applyManifest)
         const fileBlob = await this.getDocumentBlobFromFiles(newFiles)
         //Limpiamos para no dejar variables residuales a la hora de hacer el próximo documento
         LibofDocTemplateManagerService.removeVariables()
         return fileBlob
     }
 
-    addVariable(name:string, value: string | TemplateVariableObject[]){
+    addVariable(name:string, value: string | TemplateVariableObject[] | Blob){
         LibofDocTemplateManagerService.addVariable(name, value)
     }
 
@@ -49,10 +53,18 @@ class LibofDocTemplateImp {
         return files.find(file => file.name === this.contentFile)?.content!
     }
 
-    private updateFileContent(files:DocFile[], newFileContent:string){
+    private getDocManifest(files:DocFile[]){
+        return files.find(file => file.name === this.manifestFile)?.content!
+    }
+
+    private updateDocumentFiles(files:DocFile[], newFileContent:string, newManifest:string){
         return files.map(file => {
             if (file.name === this.contentFile){
                 file.content = newFileContent
+            }
+
+            if (file.name === this.manifestFile){
+                file.content = newManifest
             }
             return file
         })
@@ -64,9 +76,43 @@ class LibofDocTemplateImp {
             zip.file(file.name, file.content);
         });
 
+        const imagesBase64Promise = LibofDocTemplateManagerService.getImages().map(async image => {
+            const base64 = await image.getImageBase64()
+            zip.file(image.zipUri, base64, { base64: true });
+        }) 
+        await Promise.all(imagesBase64Promise)
+
         return await zip.generateAsync({ type: 'blob' })
     }
 
+    private applyStylesToContent(fileContent:string){
+        const stylesTag = '<office:automatic-styles>'
+        const images = LibofDocTemplateManagerService.getImages()
+
+        let newFileContent = fileContent
+
+        images.forEach(image => {
+            let fileContentApply = newFileContent.replace(stylesTag, stylesTag + ' ' + image.getODTStyle())
+            newFileContent = fileContentApply
+        })
+
+        return newFileContent
+    }
+
+    
+    private applyImagesToManifest(manifest:string){
+        const manifestEndTag = '</manifest:manifest>'
+        const images = LibofDocTemplateManagerService.getImages()
+
+        let newManifest = manifest
+
+        images.forEach(image => {
+            let fileContentApply = newManifest.replace(manifestEndTag, image.getManifestEntry() + ' ' + manifestEndTag)
+            newManifest = fileContentApply
+        })
+
+        return newManifest
+    }
 
 }
 
