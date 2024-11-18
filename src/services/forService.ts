@@ -102,7 +102,6 @@ class ForServiceImp {
     }
 
      addNewForContentChild(child:ForContent, parents:ForContent[]): ForContent {
-        //Nota: hacer una funcion que cambie de forContent a array de parents y viceversa.
         if (parents[parents.length - 1].child){
             parents.push(parents[parents.length - 1].child!)
             return this.addNewForContentChild(child, parents)
