@@ -1,3 +1,4 @@
+import { TemplateVariableObject } from "../models/templateVariableObject"
 import { concatenateString, removeSpacesInRange } from "./stringUtils"
 import { endCommand, variableCommand } from "./templateComands"
 
@@ -61,3 +62,26 @@ export function mergeLdtsInXml(xmlString:string) {
 
     return processedXml;
 }
+
+export function deepCopyTemplateVariableObject(obj: TemplateVariableObject): TemplateVariableObject {
+    const copy = new TemplateVariableObject();
+  
+    for (const [key, value] of obj.entries()) {
+      if (Array.isArray(value)) {
+        // Copiar profundamente el array de TemplateVariableObject
+        const copiedArray = value.map((item) =>
+          item instanceof TemplateVariableObject ? deepCopyTemplateVariableObject(item) : item
+        );
+        copy.set(key, copiedArray);
+      } else if (value instanceof Blob) {
+        // Copiar el Blob
+        copy.set(key, value.slice(0, value.size, value.type));
+      } else {
+        // El valor es un string
+        copy.set(key, value);
+      }
+    }
+  
+    return copy;
+  }
+  

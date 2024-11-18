@@ -2,6 +2,7 @@ import JSZip from "jszip"
 import { DocFile } from "./models/docFile";
 import { TemplateVariableObject } from "./models/templateVariableObject";
 import { LibofDocTemplateManagerService } from "./services/templateManagerService";
+import { deepCopyTemplateVariableObject } from "./utils/variableUtils";
 
 export class LibofDocTemplateImp {
 
@@ -14,7 +15,7 @@ export class LibofDocTemplateImp {
         this.variables.set(name, value)
     }
 
-    async applyTemplateFromUrlDocAndDownload(docPath:string){
+    async applyTemplateFromAssetsDocAndDownload(docPath:string){
         const blob = await this.applyTemplateFromAssetsDoc(docPath)
         await this.downloadBlob(blob)
     }
@@ -33,7 +34,7 @@ export class LibofDocTemplateImp {
     async applyTemplateFromBuffer(docBuffer: ArrayBuffer)  {
         const files:DocFile[] = await this.getFilesFromBuffer(docBuffer)
         const fileContent = this.getDocFileContent(files)
-        const fileContentApply = await LibofDocTemplateManagerService.applyTemplate(fileContent, this.variables)
+        const fileContentApply = await LibofDocTemplateManagerService.applyTemplate(fileContent, deepCopyTemplateVariableObject(this.variables))
         const fileContentApplyWithStyles = this.applyStylesToContent(fileContentApply)
         const manifest = this.getDocManifest(files)
         const applyManifest = this.applyImagesToManifest(manifest)
@@ -50,7 +51,7 @@ export class LibofDocTemplateImp {
         // Crear un enlace de descarga
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'archivo.odt'; // Nombre del archivo a descargar
+        a.download = new Date().toDateString() + '.odt';
 
         // Simular un clic en el enlace para iniciar la descarga
         a.click();

@@ -2,7 +2,7 @@ import { ForContent } from "../models/forContent"
 import { TemplateVariableObject } from "../models/templateVariableObject"
 import { getAppearForLine } from "../utils/forUtils"
 import { formatXml, removeLineBreaks } from "../utils/stringUtils"
-import { cleanLdtTags, mergeLdtsInXml } from "../utils/variableUtils"
+import { cleanLdtTags, deepCopyTemplateVariableObject, mergeLdtsInXml } from "../utils/variableUtils"
 import { ForService } from "./forService"
 import { VariableService } from "./variableService"
 import { DocImage } from '../models/docImage'
@@ -12,6 +12,7 @@ import { DocImage } from '../models/docImage'
     private images: DocImage[] = []
 
     private async applyAllFor(lines:string[], variables: TemplateVariableObject): Promise<string[]> {
+        variables = deepCopyTemplateVariableObject(variables)
         const baseForContent: ForContent = {
             elementName: 'parent',
             value: variables
@@ -33,6 +34,7 @@ import { DocImage } from '../models/docImage'
     }
 
     async applyTemplate(contentXml:string, variables: TemplateVariableObject){
+        variables = deepCopyTemplateVariableObject(variables)
         let lines = this.formatXml(contentXml)
         lines = await this.applyAllFor(lines, variables)
         const tamplateLines = await VariableService.applyVariablesInLines(variables, lines)

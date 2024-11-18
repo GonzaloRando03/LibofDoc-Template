@@ -44,7 +44,11 @@ export class DocImage {
 
     static async fromBlob(imageBlob:Blob): Promise<DocImage> {
         const data = await this.getImageDetails(imageBlob)
-        const imageId = new Date().getMilliseconds().toString()
+        const imageId = new Date().getMilliseconds().toString() + 
+            new Date().getDate().toString() + 
+            new Date().getMinutes().toString() + 
+            new Date().getSeconds().toString() 
+            
         return new DocImage(imageId, data.width, data.height, imageBlob, data.extension)
     }
 

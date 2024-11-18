@@ -2,13 +2,14 @@ import { ForContent } from "../models/forContent"
 import { TemplateVariableObject } from "../models/templateVariableObject"
 import { removeSpacesInRange } from "../utils/stringUtils"
 import { endCommand, variableCommand } from "../utils/templateComands"
-import { getVariableName } from "../utils/variableUtils"
+import { deepCopyTemplateVariableObject, getVariableName } from "../utils/variableUtils"
 import { LibofDocTemplateManagerService } from "./templateManagerService"
 
  class VariableServiceImp {
     
      async applyVariablesInLines(variables: TemplateVariableObject, lines:string[], forContent?:ForContent): Promise<string[]> {
-
+        variables = deepCopyTemplateVariableObject(variables)
+        
         const newLines:string[] = []
         for (let line of lines){
             newLines.push(line.includes(variableCommand)
@@ -33,10 +34,14 @@ import { LibofDocTemplateManagerService } from "./templateManagerService"
    
 
      async applyVariable(variables: TemplateVariableObject, line:string, forContent?:ForContent): Promise<string> {
+        variables = deepCopyTemplateVariableObject(variables)
+
         const startIndex = line.indexOf(variableCommand)
         const endIndex = line.indexOf(endCommand, startIndex)
         const lineWithoutSpaces = removeSpacesInRange(line, startIndex, endIndex)
         const variableName = getVariableName(line)
+
+        console.log('se va a aplicar la variable: ', variableName)
 
         try {
             const variableFullCommand:string = (variableCommand + variableName + endCommand).replace(' ','')

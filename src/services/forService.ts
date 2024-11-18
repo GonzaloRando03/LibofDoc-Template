@@ -43,6 +43,7 @@ class ForServiceImp {
         const forApplyedLinesWithoutCommands = removeForCommand(nextForName, nextForApplyLines)
         const fullApplyLines = [...lines]
         fullApplyLines.splice(nextForLines.startIndex, nextForLines.endIndex - nextForLines.startIndex + 1, ...forApplyedLinesWithoutCommands)
+        console.log('las líneas del for aplicado son: ', fullApplyLines.join(' '))
         return fullApplyLines
     }
     
