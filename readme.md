@@ -92,6 +92,23 @@ const imageBlob = await obtenerBlobImagen()
 template.addVariable('image1', imageBlob)
 ```
 
+### Get Document with Applied Variables
+
+We can apply the variables from your document ArrayBuffer or from a String with the path where it is located
+```
+const docPath = '/testLibofDocTemplate.odt'
+const docArrayBuffer = getArrayBuffer()
+
+//Get document Blob
+const blobFromAsset = await template.applyTemplateFromAssetsDoc(docPath)
+const blobFromArrayBuffer = await template.applyTemplateFromBuffer(docArrayBuffer)
+
+//Download document
+await template.applyTemplateFromAssetsDocAndDownload(docPath)
+await template.applyTemplateFromBufferAndDownload(docArrayBuffer)
+```
+
+
 ## Processed document
 ![image](https://github.com/user-attachments/assets/7faac1ec-b394-4b12-a573-711c2e22d592)
 
