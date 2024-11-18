@@ -32,7 +32,7 @@ We can iterate arrays with LibofDocTemplate! To do this we use a for loop and ac
 ```
 
 ### Template Example
-![image](https://github.com/user-attachments/assets/347e22bc-368d-4b86-b622-f7528335f35a)
+![image](https://github.com/user-attachments/assets/09021cfd-1544-4dea-b50b-d29174534bc3)
 
 
 ## Usage
